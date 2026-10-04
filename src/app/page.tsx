@@ -1,69 +1,146 @@
 import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowUpRight,
+  HeartHandshake,
+  Landmark,
+  ShieldCheck,
+  UsersRound,
+} from "lucide-react";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
+import { getPublicOverview } from "@/lib/public-data";
+import { formatCurrency } from "@/lib/format";
 
-export default function Home() {
+export const revalidate = 60;
+
+export default async function Home() {
+  const { stats, notices, committee, error } = await getPublicOverview();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <Header />
+      <main>
+        <section className="hero">
+          <div className="hero__glow hero__glow--one" />
+          <div className="hero__glow hero__glow--two" />
+          <div className="container hero__inner">
+            <div className="hero__copy">
+              <span className="eyebrow"><HeartHandshake size={16} /> মানবতার সেবায় একসাথে</span>
+              <h1>সহমর্মিতার হাত<br /><span>পৌঁছে যাক</span> প্রতিটি ঘরে</h1>
+              <p>
+                আব্দুল জব্বার চ্যারিটি ফাউন্ডেশন মানুষের পাশে দাঁড়াতে,
+                সামর্থ্যবানদের সহায়তা পৌঁছে দিতে এবং স্বচ্ছতার সঙ্গে সেবামূলক
+                কাজ এগিয়ে নিতে প্রতিশ্রুতিবদ্ধ।
+              </p>
+              <div className="hero__actions">
+                <a className="button button--gold" href="#amader-kaj">আমাদের কার্যক্রম দেখুন <ArrowUpRight size={17} /></a>
+                <Link className="button button--outline-light" href="/login">সদস্য লগইন</Link>
+              </div>
+              <div className="hero__trust"><ShieldCheck size={17} /> স্বচ্ছ হিসাব, সম্মিলিত উদ্যোগ, মানবিক সহায়তা</div>
+            </div>
+            <div className="hero__brand" aria-label="আব্দুল জব্বার ফাউন্ডেশন">
+              <div className="hero__logo-frame">
+                <Image src="/logo-foundation.png" alt="আব্দুল জব্বার ফাউন্ডেশনের লোগো" width={760} height={510} sizes="(max-width: 760px) 90vw, 493px" priority />
+              </div>
+              <div className="hero__seal"><HeartHandshake size={23} /><span>মানবতার<br />পাশে</span></div>
+            </div>
+          </div>
+          <div className="hero__bottom-line" />
+        </section>
+
+        <section className="section section--stats" aria-labelledby="finance-heading">
+          <div className="container">
+            <div className="section-heading section-heading--center">
+              <span className="eyebrow eyebrow--muted"><Landmark size={15} /> আর্থিক স্বচ্ছতা</span>
+              <h2 id="finance-heading">প্রতিটি অনুদানের হিসাব</h2>
+              <p>সব হিসাব লেনদেনের তথ্য থেকে স্বয়ংক্রিয়ভাবে গণনা করা হয়।</p>
+            </div>
+            <div className="stats-link"><a className="text-link" href="/financials">সদস্যভিত্তিক অনুদান ও ব্যয়ের বিস্তারিত দেখুন <ArrowUpRight size={16} /></a></div>
+            <div className="stats-grid">
+              <article className="stat-card">
+                <span className="stat-card__icon stat-card__icon--navy"><Landmark size={19} /></span>
+                <span className="stat-card__label">মোট ফান্ড সংগ্রহ</span>
+                <strong>{formatCurrency(stats?.income ?? null)}</strong>
+                <span className="stat-card__foot">সর্বমোট জমা</span>
+              </article>
+              <article className="stat-card">
+                <span className="stat-card__icon stat-card__icon--rose"><ArrowUpRight size={19} /></span>
+                <span className="stat-card__label">মোট খরচ</span>
+                <strong>{formatCurrency(stats?.expense ?? null)}</strong>
+                <span className="stat-card__foot">সেবামূলক কার্যক্রমে</span>
+              </article>
+              <article className="stat-card stat-card--balance">
+                <span className="stat-card__icon stat-card__icon--gold"><ShieldCheck size={19} /></span>
+                <span className="stat-card__label">বর্তমান ব্যালেন্স</span>
+                <strong>{formatCurrency(stats?.balance ?? null)}</strong>
+                <span className="stat-card__foot">জমা থেকে খরচ বাদ দিয়ে</span>
+              </article>
+            </div>
+            {error && <p className="inline-note" role="status">{error}</p>}
+          </div>
+        </section>
+
+        <section className="section section--warm" id="amader-kaj">
+          <div className="container">
+            <div className="section-heading section-heading--split">
+              <div><span className="eyebrow eyebrow--muted">আমাদের অঙ্গীকার</span><h2>একটু সহায়তা, অনেকটা আশার আলো</h2></div>
+              <p>আপনার আস্থা ও সহযোগিতায় আমরা প্রয়োজনের সময়ে মানুষের পাশে থাকার চেষ্টা করি।</p>
+            </div>
+            <div className="mission-grid">
+              <article className="mission-card"><span className="mission-card__number">০১</span><HeartHandshake size={25} /><h3>মানবিক সহায়তা</h3><p>প্রয়োজনের সময়ে সহায়তা পৌঁছে দিতে সম্মিলিত উদ্যোগ।</p></article>
+              <article className="mission-card"><span className="mission-card__number">০২</span><Landmark size={25} /><h3>স্বচ্ছ হিসাব</h3><p>জমা ও ব্যয়ের তথ্য সবার জন্য পরিষ্কারভাবে তুলে ধরা।</p></article>
+              <article className="mission-card"><span className="mission-card__number">০৩</span><UsersRound size={25} /><h3>একসাথে পথচলা</h3><p>সদস্য ও শুভানুধ্যায়ীদের অংশগ্রহণে সেবার কাজ এগিয়ে নেওয়া।</p></article>
+            </div>
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="container">
+            <div className="section-heading section-heading--split">
+              <div><span className="eyebrow eyebrow--muted">সাম্প্রতিক আপডেট</span><h2>নোটিশ বোর্ড</h2></div>
+              <Link className="text-link" href="/notices">সব নোটিশ দেখুন <ArrowUpRight size={16} /></Link>
+            </div>
+            {notices.length ? <div className="notice-grid">
+              {notices.slice(0, 3).map((notice) => (
+                <article className="notice-card" key={notice.id}>
+                  {notice.is_pinned && <span className="notice-card__tag">গুরুত্বপূর্ণ</span>}
+                  <span className="notice-card__date">{notice.date}</span>
+                  <h3>{notice.title}</h3>
+                  <p>{notice.content}</p>
+                  {notice.image && <Image className="notice-image" src={notice.image} alt={`${notice.title}-এর ছবি`} width={800} height={450} sizes="(max-width: 760px) calc(100vw - 60px), 350px" />}
+                  <span className="notice-card__author">প্রকাশক: {notice.author}</span>
+                </article>
+              ))}
+            </div> : <div className="empty-state">এখনও কোনো নোটিশ প্রকাশ করা হয়নি।</div>}
+          </div>
+        </section>
+
+        <section className="section section--committee">
+          <div className="container">
+            <div className="section-heading section-heading--split">
+              <div><span className="eyebrow eyebrow--muted">দায়িত্বে যারা</span><h2>বর্তমান কমিটি</h2></div>
+              <Link className="text-link" href="/committee">কমিটির পরিচিতি <ArrowUpRight size={16} /></Link>
+            </div>
+            {committee.length ? <div className="committee-grid">
+              {committee.slice(0, 4).map((member) => (
+                <article className="committee-card" key={member.id}>
+                  <div className="committee-card__photo">{member.photo ? <Image src={member.photo} alt={member.name} width={80} height={80} /> : <UsersRound size={27} />}</div>
+                  <div><span>{member.position}</span><h3>{member.name}</h3>{member.bio && <p>{member.bio}</p>}</div>
+                </article>
+              ))}
+            </div> : <div className="empty-state">বর্তমান কমিটির কোনো তথ্য পাওয়া যায়নি।</div>}
+          </div>
+        </section>
+
+        <section className="join-cta">
+          <div className="container join-cta__inner">
+            <div><span className="eyebrow eyebrow--light">আপনিও যুক্ত হোন</span><h2>মানবতার সেবায় আপনার পাশে চাই</h2><p>সদস্য হিসেবে যুক্ত হয়ে আমাদের সেবামূলক উদ্যোগে অংশ নিন।</p></div>
+            <Link className="button button--gold" href="/register">সদস্য নিবন্ধন <ArrowUpRight size={17} /></Link>
+          </div>
+        </section>
       </main>
-    </div>
+      <Footer />
+    </>
   );
 }

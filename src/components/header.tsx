@@ -7,6 +7,7 @@ const links = [
   ["আমাদের সম্পর্কে", "/#amader-kaj"],
   ["নোটিশ", "/notices"],
   ["বর্তমান কমিটি", "/committee"],
+  ["দান করুন", "/#donate"],
   ["আর্থিক হিসাব", "/financials"],
 ];
 
@@ -22,6 +23,7 @@ export function Header() {
           {links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}
         </nav>
         <div className="header-actions">
+          <Link className="header-donate" href="/#donate">দান করুন</Link>
           <Link className="header-login" href="/login"><ShieldCheck size={16} /> লগইন</Link>
           <details className="mobile-menu">
             <summary aria-label="মেনু খুলুন"><Menu size={21} /></summary>

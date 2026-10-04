@@ -7,21 +7,26 @@ import { type FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { toBangladeshAuthPhone } from "@/lib/phone";
 
 export default function LoginPage() {
   const router = useRouter();
   const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
   const [pending, setPending] = useState(false);
-  const [resetMode, setResetMode] = useState(false);
+  const [helpMode, setHelpMode] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
-    setSuccess(false);
     setPending(true);
     const form = new FormData(event.currentTarget);
-    const email = String(form.get("email") ?? "").trim();
+    const phoneInput = String(form.get("mobile") ?? "").trim();
+    const phone = toBangladeshAuthPhone(phoneInput);
+    if (!phone) {
+      setMessage("সঠিক ১১ সংখ্যার বাংলাদেশি মোবাইল নম্বর লিখুন।");
+      setPending(false);
+      return;
+    }
     const supabase = createClient();
     if (!supabase) {
       setMessage("সুপাবেস সংযোগ এখনো সেট করা হয়নি। প্রকাশের আগে প্রকল্পের পরিবেশ-চলক যোগ করুন।");
@@ -29,20 +34,16 @@ export default function LoginPage() {
       return;
     }
 
-    if (resetMode) {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-      });
-      setMessage(error ? "পাসওয়ার্ড পুনরুদ্ধারের ইমেইল পাঠানো যায়নি। ঠিকানা যাচাই করে আবার চেষ্টা করুন।" : "পাসওয়ার্ড পরিবর্তনের নির্দেশনা আপনার ইমেইলে পাঠানো হয়েছে।");
-      setSuccess(!error);
+    if (helpMode) {
+      setMessage("নম্বর যাচাই ছাড়া স্বয়ংক্রিয়ভাবে পাসওয়ার্ড বদলালে অন্য কেউ আপনার অ্যাকাউন্ট নিতে পারে। পরিচয় যাচাইয়ের জন্য ফাউন্ডেশন প্রশাসকের সঙ্গে যোগাযোগ করুন।");
       setPending(false);
       return;
     }
 
     const password = String(form.get("password") ?? "");
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ phone, password });
     if (error || !data.user) {
-      setMessage("ইমেইল অথবা পাসওয়ার্ড সঠিক নয়। আবার চেষ্টা করুন।");
+      setMessage("মোবাইল নম্বর অথবা পাসওয়ার্ড সঠিক নয়। আবার চেষ্টা করুন।");
       setPending(false);
       return;
     }
@@ -86,21 +87,22 @@ export default function LoginPage() {
         <section className="auth-main">
           <div className="auth-card">
             <div className="auth-card__top">
-              <h2>{resetMode ? "পাসওয়ার্ড পুনরুদ্ধার" : "লগইন করুন"}</h2>
-              <p>{resetMode ? "আপনার ইমেইলে পাসওয়ার্ড পরিবর্তনের নির্দেশনা পাঠানো হবে।" : "আপনার সদস্য অ্যাকাউন্টে প্রবেশ করুন।"}</p>
+              <h2>{helpMode ? "পাসওয়ার্ড সহায়তা" : "লগইন করুন"}</h2>
+              <p>{helpMode ? "অ্যাকাউন্টের নিরাপত্তার জন্য প্রশাসকের সাহায্য নিন।" : "আপনার মোবাইল নম্বর ও পাসওয়ার্ড দিয়ে প্রবেশ করুন।"}</p>
             </div>
             <form className="form-grid" onSubmit={handleSubmit}>
-              <div className="field"><label htmlFor="email">ইমেইল</label><input id="email" name="email" type="email" autoComplete="email" required placeholder="আপনার ইমেইল লিখুন" /></div>
-              {!resetMode && <div className="field"><label htmlFor="password">পাসওয়ার্ড</label><input id="password" name="password" type="password" autoComplete="current-password" required placeholder="আপনার পাসওয়ার্ড লিখুন" /></div>}
-              {message && <div className={`form-alert${success ? " form-alert--success" : ""}`} role="status">{message}</div>}
-              <button className="button auth-submit" type="submit" disabled={pending}>{pending ? "লোড হচ্ছে..." : resetMode ? "নির্দেশনা পাঠান" : "লগইন করুন"}</button>
+              <div className="field"><label htmlFor="mobile">মোবাইল নম্বর</label><input id="mobile" name="mobile" type="tel" autoComplete="tel" required placeholder="০১XXXXXXXXX" /></div>
+              {!helpMode && <div className="field"><label htmlFor="password">পাসওয়ার্ড</label><input id="password" name="password" type="password" autoComplete="current-password" required placeholder="আপনার পাসওয়ার্ড লিখুন" /></div>}
+              {message && <div className="form-alert" role="status">{message}</div>}
+              {!helpMode && <button className="button auth-submit" type="submit" disabled={pending}>{pending ? "লোড হচ্ছে..." : "লগইন করুন"}</button>}
             </form>
             <div className="auth-links">
-              <button className="table-action" type="button" onClick={() => { setResetMode(!resetMode); setMessage(""); }}>
-                {resetMode ? "লগইনে ফিরে যান" : "পাসওয়ার্ড ভুলে গেছেন?"}
+              <button className="table-action" type="button" onClick={() => { setHelpMode(!helpMode); setMessage(""); }}>
+                {helpMode ? "লগইনে ফিরে যান" : "পাসওয়ার্ড ভুলে গেছেন?"}
               </button>
-              {!resetMode && <span>নতুন সদস্য? <Link href="/register">নিবন্ধন করুন</Link></span>}
+              {!helpMode && <span>নতুন সদস্য? <Link href="/register">নিবন্ধন করুন</Link></span>}
             </div>
+            {helpMode && <div className="form-alert">অ্যাকাউন্টে দেওয়া মোবাইল নম্বরটি যাচাই করা ছাড়া পাসওয়ার্ড পুনরুদ্ধার করা নিরাপদ নয়।</div>}
             <div className="auth-divider" />
             <Link className="text-link" href="/">মূল পাতায় ফিরে যান</Link>
           </div>

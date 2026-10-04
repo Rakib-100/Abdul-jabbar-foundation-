@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { DonationForm } from "@/components/donation-form";
 import { getPublicOverview } from "@/lib/public-data";
 import { formatCurrency } from "@/lib/format";
 
@@ -48,6 +49,8 @@ export default async function Home() {
           </div>
           <div className="hero__bottom-line" />
         </section>
+
+        <DonationForm />
 
         <section className="section section--stats" aria-labelledby="finance-heading">
           <div className="container">

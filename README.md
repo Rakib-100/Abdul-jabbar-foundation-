@@ -7,6 +7,7 @@
 - বাংলা ভাষার responsive public site, আর্থিক স্বচ্ছতার পাতা, নোটিশ বোর্ড এবং বর্তমান কমিটি
 - Supabase Auth-ভিত্তিক সদস্য নিবন্ধন ও লগইন; জনসাধারণ ADMIN নির্বাচন করতে পারে না
 - ADMIN, COMMITTEE ও MEMBER ভূমিকার জন্য পৃথক অনুমতি
+- বিকাশে পাঠানো অনুদানের আবেদন এবং ADMIN-এর যাচাই-অনুমোদনের পরে মূল লেজারে যোগ
 - লেনদেন থেকে স্বয়ংক্রিয় জমা, খরচ ও ব্যালেন্স গণনা
 - ADMIN-এর লেনদেন/খাত/সদস্য/কমিটি/রিপোর্ট/audit পরিচালনা
 - COMMITTEE-এর নোটিশ প্রকাশ ও নিজের নোটিশ সম্পাদনা
@@ -36,27 +37,30 @@ NEXT_PUBLIC_SUPABASE_URL=https://আপনার-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=আপনার-publishable-key
 ```
 
-৩. Supabase Dashboard → SQL Editor-এ গিয়ে `supabase/migrations/20261004000000_initial_schema.sql` ফাইলের সম্পূর্ণ SQL চালান। এতে table, function, trigger, RLS policy, প্রাথমিক খাত এবং প্রয়োজনীয় Storage bucket/policy তৈরি হবে।
-৪. Authentication → URL Configuration-এ স্থানীয় ও production URL যোগ করুন:
+৩. Supabase Dashboard → SQL Editor-এ ক্রমানুসারে `supabase/migrations/20261004000000_initial_schema.sql` এবং `supabase/migrations/20261004230000_phone_login_and_donation_submissions.sql`—দুই ফাইলের সম্পূর্ণ SQL চালান।
+৪. Authentication → Providers/Sign In-এ **Phone** চালু করুন। OTP ছাড়া নিবন্ধন-লগইনের জন্য **Confirm phone** বন্ধ রাখুন। এতে মোবাইল নম্বর যে ব্যবহারকারীর, তা SMS দিয়ে যাচাই হয় না; যে কেউ অন্যের নম্বর দিয়ে account খোলার ঝুঁকি থাকে। production-এ OTP চালু করার সিদ্ধান্ত নিলে SMS provider লাগবে এবং বর্তমান UI-তে OTP flow যোগ করতে হবে।
+৫. Authentication → URL Configuration-এ স্থানীয় ও production URL যোগ করুন:
 
 - Site URL: স্থানীয়ভাবে `http://localhost:3000`; প্রকাশের পরে Vercel URL
 - Redirect URL: `http://localhost:3000/auth/callback`
 - Redirect URL: `https://আপনার-vercel-domain/auth/callback`
-- পাসওয়ার্ড পুনরুদ্ধার redirect: `http://localhost:3000/auth/callback?next=/reset-password` এবং Vercel-এর সমতুল্য URL allowlist করুন
-
-Email confirmation চালু থাকলে সদস্যদের ইমেইল নিশ্চিত করতে হবে। Auth email template বাংলায় পরিবর্তন করুন।
+- মোবাইল verification বন্ধ থাকলে callback redirect প্রয়োজন নেই।
 
 ## প্রথম ADMIN তৈরি
 
-সাধারণ নিবন্ধন ফর্মে ADMIN ভূমিকা নেই। Supabase Dashboard → Authentication → Users থেকে নিজের/নির্দিষ্ট প্রশাসকের ইমেইল দিয়ে user তৈরি করুন। `handle_new_user` trigger প্রাথমিক MEMBER profile বানাবে। এরপর SQL Editor-এ কেবল সেই নির্দিষ্ট ইমেইল দিয়ে চালান:
+সাধারণ নিবন্ধন ফর্মে ADMIN ভূমিকা নেই। Supabase Dashboard → Authentication → Users থেকে নির্দিষ্ট প্রশাসকের বাংলাদেশি মোবাইল নম্বর ও password দিয়ে user তৈরি করুন। `handle_new_user` trigger প্রাথমিক MEMBER profile বানাবে। এরপর SQL Editor-এ কেবল সেই নির্দিষ্ট মোবাইল নম্বর দিয়ে চালান:
 
 ```sql
 update public.profiles
 set role = 'ADMIN', is_active = true
-where email = 'admin@example.com';
+where mobile = '+8801XXXXXXXXX';
 ```
 
-`admin@example.com`-এর জায়গায় প্রকৃত ইমেইল দিন এবং update-এর আগে/পরে row-টি যাচাই করুন। ADMIN ভূমিকা পরিবর্তনের public API নেই। Supabase Service Role Key browser-এ বা `NEXT_PUBLIC_` variable-এ কখনো রাখবেন না।
+`+8801XXXXXXXXX`-এর জায়গায় প্রকৃত E.164 নম্বর দিন এবং update-এর আগে/পরে row-টি যাচাই করুন। ADMIN ভূমিকা পরিবর্তনের public API নেই। Supabase Service Role Key browser-এ বা `NEXT_PUBLIC_` variable-এ কখনো রাখবেন না।
+
+## বিকাশে অনুদান
+
+মূল পাতার **দান করুন** অংশে বিকাশ পার্সোনাল `01304-040565` নম্বরে সেন্ড মানি করার নির্দেশনা আছে। টাকা পাঠানোর পরে দাতা নাম, ট্রানজেকশন আইডি ও পরিমাণ পাঠাবেন। আবেদন আলাদা `donation_submissions` টেবিলে থাকে; মূল ব্যালেন্সে যোগ হয় না। ADMIN বিকাশে ট্রানজেকশন আইডি যাচাই করে **যাচাই করেছি — মূল হিসাবে যোগ করুন** চাপলে database function একই transaction-এ লেজার entry ও আবেদন status সংরক্ষণ করে এবং audit log তৈরি হয়। সন্দেহজনক আবেদন মুছে না দিয়ে বাতিল হিসেবে চিহ্নিত করা হয়।
 
 ## আর্থিক প্রতিবেদন আমদানি
 

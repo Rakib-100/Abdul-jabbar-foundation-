@@ -25,6 +25,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const isAdmin = profile?.role === "ADMIN";
   const membersResult = isAdmin ? await supabase.from("profiles").select("id, role, is_active") : null;
   if (membersResult?.error) console.error("Dashboard member count failed:", membersResult.error);
+  const donationsResult = isAdmin
+    ? await supabase.from("donation_submissions").select("id, donor_name, transaction_reference, amount, created_at").eq("status", "PENDING").order("created_at", { ascending: false }).limit(3)
+    : null;
+  if (donationsResult?.error) console.error("Dashboard pending donations query failed:", donationsResult.error);
   const committeeCount = membersResult?.data?.filter((item) => item.role === "COMMITTEE").length ?? 0;
   const authorIds = [...new Set((noticeResult.data ?? []).map((item) => item.author_id))];
   const authorsResult = authorIds.length ? await supabase.from("public_profiles").select("id, full_name").in("id", authorIds) : { data: [], error: null };
@@ -55,6 +59,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <Link href="/dashboard/reports"><ArrowUpRight size={17} /> রিপোর্ট দেখুন</Link>
       </section>}
       {profile?.role === "COMMITTEE" && <section className="dashboard-quick"><Link href="/dashboard/notices"><Bell size={17} /> নতুন নোটিশ প্রকাশ করুন</Link></section>}
+
+      {isAdmin && donationsResult && <section className="panel donation-dashboard-panel">
+        <div className="panel-header"><h2>নতুন অনুদানের আবেদন{donationsResult.data?.length ? <span className="donation-badge donation-badge--inline">{donationsResult.data.length.toLocaleString("bn-BD")}</span> : null}</h2><Link className="text-link" href="/dashboard/donations">সব আবেদন দেখুন <ArrowUpRight size={15} /></Link></div>
+        {donationsResult.error ? <EmptyState>অনুদানের আবেদন লোড করা যায়নি। পরে আবার চেষ্টা করুন।</EmptyState> : donationsResult.data?.length ? donationsResult.data.map((item) => <article className="notice-detail donation-dashboard-row" key={item.id}><span className="notice-card__date">{formatDate(item.created_at)}</span><h3>{item.donor_name} · {formatCurrency(Number(item.amount))}</h3><p>ট্রানজেকশন আইডি: {item.transaction_reference}</p></article>) : <EmptyState>যাচাইয়ের অপেক্ষায় কোনো নতুন আবেদন নেই।</EmptyState>}
+      </section>}
 
       <section className="panel">
         <div className="panel-header"><h2>সাম্প্রতিক লেনদেন</h2><Link className="text-link" href="/dashboard/transactions">সব লেনদেন <ArrowUpRight size={15} /></Link></div>

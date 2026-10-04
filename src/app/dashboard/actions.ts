@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Role, TransactionType } from "@/types/database";
+import { toBangladeshAuthPhone } from "@/lib/phone";
 
 const maxImageSize = 2 * 1024 * 1024;
 const validImageTypes = ["image/jpeg", "image/png"];
@@ -30,10 +31,12 @@ export async function updateProfile(form: FormData) {
   const mobile = String(form.get("mobile") ?? "").trim();
   const address = String(form.get("address") ?? "").trim();
   const file = form.get("photo");
-  if (!fullName || !mobile || !/^[+0-9০-৯][0-9০-৯\s()-]{7,19}$/.test(mobile)) finish("/dashboard/profile", "error");
-  const update: { full_name: string; mobile: string; address: string | null; profile_photo_url?: string } = {
+  const phone = toBangladeshAuthPhone(mobile);
+  const { data: { user } } = await current.supabase.auth.getUser();
+  if (!fullName || !phone) finish("/dashboard/profile", "error");
+  if (phone !== user?.phone) finish("/dashboard/profile", "phone-locked");
+  const update: { full_name: string; address: string | null; profile_photo_url?: string } = {
     full_name: fullName,
-    mobile,
     address: address || null,
   };
   let photoPath: string | null = null;
@@ -332,4 +335,36 @@ export async function removeCommitteeMember(form: FormData) {
     finish("/dashboard/committee", "error");
   }
   finish("/dashboard/committee", "updated");
+}
+
+export async function recordDonationSubmission(form: FormData) {
+  const current = await actor(["ADMIN"]);
+  if (!current) finish("/dashboard/donations", "denied");
+  const submissionId = String(form.get("submission_id") ?? "");
+  const categoryId = String(form.get("category_id") ?? "");
+  const date = String(form.get("donation_date") ?? "");
+  if (!submissionId || !categoryId) finish("/dashboard/donations", "error");
+  const { error } = await current.supabase.rpc("record_donation_submission", {
+    submission_id: submissionId,
+    income_category_id: categoryId,
+    donation_date: date || null,
+  });
+  if (error) {
+    console.error("Donation submission could not be recorded:", error);
+    finish("/dashboard/donations", error.code === "23505" ? "duplicate" : "error");
+  }
+  finish("/dashboard/donations", "recorded");
+}
+
+export async function rejectDonationSubmission(form: FormData) {
+  const current = await actor(["ADMIN"]);
+  if (!current) finish("/dashboard/donations", "denied");
+  const submissionId = String(form.get("submission_id") ?? "");
+  if (!submissionId) finish("/dashboard/donations", "error");
+  const { error } = await current.supabase.rpc("reject_donation_submission", { submission_id: submissionId });
+  if (error) {
+    console.error("Donation submission could not be rejected:", error);
+    finish("/dashboard/donations", "error");
+  }
+  finish("/dashboard/donations", "rejected");
 }

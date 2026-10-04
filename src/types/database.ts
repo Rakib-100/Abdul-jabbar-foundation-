@@ -10,14 +10,14 @@ export type Database = {
           full_name: string;
           mobile: string | null;
           address: string | null;
-          email: string;
+          email: string | null;
           profile_photo_url: string | null;
           role: Role;
           is_active: boolean;
           created_at: string;
           updated_at: string;
         };
-        Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & { id: string; email: string; full_name: string };
+        Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & { id: string; email?: string | null; full_name: string };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
         Relationships: [];
       };
@@ -40,6 +40,21 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["transactions"]["Insert"]>;
         Relationships: [];
+      };
+      donation_submissions: {
+          Row: {
+            id: string;
+            donor_name: string;
+            transaction_reference: string;
+            amount: number;
+            status: "PENDING" | "RECORDED" | "REJECTED";
+            transaction_id: string | null;
+            created_at: string;
+            updated_at: string;
+          };
+          Insert: { donor_name: string; transaction_reference: string; amount: number };
+          Update: never;
+          Relationships: [];
       };
       notices: {
         Row: {
@@ -78,8 +93,20 @@ export type Database = {
         Args: Record<string, never>;
         Returns: { income_total: number; expense_total: number; current_balance: number }[];
       };
+      record_donation_submission: {
+        Args: { submission_id: string; income_category_id: string; donation_date: string | null };
+        Returns: string;
+      };
+      reject_donation_submission: {
+        Args: { submission_id: string };
+        Returns: undefined;
+      };
     };
-    Enums: { app_role: Role; transaction_type: TransactionType };
+    Enums: {
+      app_role: Role;
+      transaction_type: TransactionType;
+      donation_submission_status: "PENDING" | "RECORDED" | "REJECTED";
+    };
     CompositeTypes: Record<string, never>;
   };
 };

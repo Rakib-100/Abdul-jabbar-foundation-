@@ -5,6 +5,7 @@ import { setMemberAccess } from "@/app/dashboard/actions";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
 import type { Role } from "@/types/database";
+import { formatBangladeshPhone } from "@/lib/phone";
 
 export const metadata: Metadata = { title: "সদস্য পরিচালনা" };
 
@@ -16,9 +17,10 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
   if (!supabase) return null;
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: currentProfile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  const { data: currentProfile, error: accessError } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  if (accessError) console.error("Member page authorization lookup failed:", accessError);
   if (currentProfile?.role !== "ADMIN") redirect("/dashboard?status=denied");
-  let query = supabase.from("profiles").select("id, full_name, mobile, address, email, role, is_active, created_at").order("created_at", { ascending: false });
+  let query = supabase.from("profiles").select("id, full_name, mobile, address, role, is_active, created_at").order("created_at", { ascending: false });
   if (search.trim()) query = query.ilike("full_name", `%${search.trim()}%`);
   const { data: members, error } = await query;
   if (error) console.error("Member management query failed:", error);
@@ -38,8 +40,8 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
         {error ? <EmptyState>সদস্যদের তথ্য লোড করা যায়নি। পরে আবার চেষ্টা করুন।</EmptyState> : members?.length ? <div className="data-table-wrap"><table className="data-table">
           <thead><tr><th>নাম</th><th>মোবাইল নম্বর</th><th>ঠিকানা</th><th>ধরন</th><th>নিবন্ধনের তারিখ</th><th>অবস্থা</th><th>পরিচালনা</th></tr></thead>
           <tbody>{members.map((member) => <tr key={member.id}>
-            <td>{member.full_name}<br /><span className="field-hint">{member.email}</span></td>
-            <td>{member.mobile ?? "—"}</td><td>{member.address ?? "—"}</td>
+            <td>{member.full_name}</td>
+            <td>{formatBangladeshPhone(member.mobile)}</td><td>{member.address ?? "—"}</td>
             <td>{roleLabels[member.role]}</td><td>{formatDate(member.created_at)}</td>
             <td><span className={`pill${member.is_active ? "" : " pill--inactive"}`}>{member.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}</span></td>
             <td>{member.role === "ADMIN" ? "—" : <div className="member-access-form">

@@ -7,6 +7,7 @@ import { type ChangeEvent, type FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { toBangladeshAuthPhone } from "@/lib/phone";
 
 const maxImageSize = 2 * 1024 * 1024;
 
@@ -45,28 +46,27 @@ export default function RegisterPage() {
     const fullName = String(form.get("full_name") ?? "").trim();
     const mobile = String(form.get("mobile") ?? "").trim();
     const address = String(form.get("address") ?? "").trim();
-    const email = String(form.get("email") ?? "").trim();
+    const authPhone = toBangladeshAuthPhone(mobile);
     const password = String(form.get("password") ?? "");
     const confirmPassword = String(form.get("confirm_password") ?? "");
     if (!fullName) return finish("অনুগ্রহ করে আপনার নাম লিখুন।");
     if (!mobile) return finish("অনুগ্রহ করে মোবাইল নম্বর দিন।");
     if (!address) return finish("অনুগ্রহ করে আপনার ঠিকানা লিখুন।");
-    if (!/^[+0-9০-৯][0-9০-৯\s()-]{7,19}$/.test(mobile)) return finish("সঠিক মোবাইল নম্বর দিন।");
+    if (!authPhone) return finish("সঠিক ১১ সংখ্যার বাংলাদেশি মোবাইল নম্বর দিন।");
     if (password.length < 8) return finish("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।");
     if (password !== confirmPassword) return finish("দুটি পাসওয়ার্ড মিলছে না।");
     const supabase = createClient();
     if (!supabase) return finish("সুপাবেস সংযোগ এখনো সেট করা হয়নি। প্রকাশের আগে প্রকল্পের পরিবেশ-চলক যোগ করুন।");
 
     const { data, error } = await supabase.auth.signUp({
-      email,
+      phone: authPhone,
       password,
       options: {
-        data: { full_name: fullName, mobile, address, role },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        data: { full_name: fullName, mobile: authPhone, address, role },
       },
     });
     if (error || !data.user) {
-      return finish("নিবন্ধন সম্পন্ন করা যায়নি। ইমেইল ঠিক আছে কি না যাচাই করে আবার চেষ্টা করুন।");
+      return finish("নিবন্ধন সম্পন্ন করা যায়নি। মোবাইল নম্বরটি ঠিক আছে কি না যাচাই করে আবার চেষ্টা করুন।");
     }
 
     if (photo && data.session) {
@@ -94,8 +94,8 @@ export default function RegisterPage() {
     }
 
     if (!data.session) {
-      setMessage("নিবন্ধন অনুরোধ গৃহীত হয়েছে। ইমেইল নিশ্চিত করে লগইন করুন; প্রয়োজনে পরে প্রোফাইল ছবি যোগ করতে পারবেন।");
-      setSuccess(true);
+      setMessage("অ্যাকাউন্ট তৈরি হয়েছে, তবে Supabase-এ ফোন যাচাইকরণ চালু থাকায় লগইন করা যাচ্ছে না। OTP ছাড়া লগইনের জন্য Supabase-এর Phone confirmation বন্ধ করতে হবে।");
+      setSuccess(false);
       setPending(false);
       return;
     }
@@ -136,10 +136,9 @@ export default function RegisterPage() {
               </div>
               <div className="field"><label htmlFor="full_name">নাম</label><input id="full_name" name="full_name" autoComplete="name" required placeholder="আপনার পূর্ণ নাম লিখুন" /></div>
               <div className="form-row">
-                <div className="field"><label htmlFor="mobile">মোবাইল নম্বর</label><input id="mobile" name="mobile" type="tel" autoComplete="tel" required placeholder="০১XXXXXXXXX" /></div>
-                <div className="field"><label htmlFor="email">ইমেইল</label><input id="email" name="email" type="email" autoComplete="email" required placeholder="name@example.com" /></div>
+                <div className="field"><label htmlFor="mobile">মোবাইল নম্বর</label><input id="mobile" name="mobile" type="tel" autoComplete="tel" inputMode="tel" required placeholder="০১XXXXXXXXX" /><span className="field-hint">এই নম্বরটিই আপনার লগইন আইডি হবে।</span></div>
+                <div className="field"><label htmlFor="address">ঠিকানা</label><input id="address" name="address" autoComplete="street-address" required placeholder="আপনার ঠিকানা" /></div>
               </div>
-              <div className="field"><label htmlFor="address">ঠিকানা</label><input id="address" name="address" autoComplete="street-address" required placeholder="আপনার ঠিকানা" /></div>
               <div className="form-row">
                 <div className="field"><label htmlFor="password">পাসওয়ার্ড</label><input id="password" name="password" type="password" autoComplete="new-password" minLength={8} required placeholder="কমপক্ষে ৮ অক্ষর" /></div>
                 <div className="field"><label htmlFor="confirm_password">পাসওয়ার্ড আবার লিখুন</label><input id="confirm_password" name="confirm_password" type="password" autoComplete="new-password" minLength={8} required placeholder="পাসওয়ার্ড নিশ্চিত করুন" /></div>

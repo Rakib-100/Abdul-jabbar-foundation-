@@ -51,6 +51,7 @@ export default async function DonationSubmissionsPage({ searchParams }: { search
                 <input type="hidden" name="submission_id" value={item.id} />
                 <div className="field"><label htmlFor={`category-${item.id}`}>যাচাইয়ের পর জমার খাত</label><select id={`category-${item.id}`} name="category_id" required defaultValue=""><option value="" disabled>জমার খাত নির্বাচন করুন</option>{categories.map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}</select></div>
                 <div className="field"><label htmlFor={`date-${item.id}`}>বিকাশে পাঠানোর তারিখ</label><input id={`date-${item.id}`} name="donation_date" type="date" /></div>
+                <div className="field"><label htmlFor={`comment-${item.id}`}>লেনদেনের তথ্য / মন্তব্য</label><textarea id={`comment-${item.id}`} name="comment" required minLength={3} maxLength={500} rows={3} placeholder="যাচাই ও জমার কারণ লিখুন" /></div>
                 <button className="button button--gold" type="submit">যাচাই করেছি — মূল হিসাবে যোগ করুন</button>
               </form>
               <form action={rejectDonationSubmission}>

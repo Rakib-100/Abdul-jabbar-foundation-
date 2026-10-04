@@ -40,7 +40,7 @@ export async function DashboardShell({ children }: Readonly<{ children: React.Re
   const menu = [
     { href: "/dashboard", label: "ড্যাশবোর্ড", icon: LayoutDashboard },
     { href: "/dashboard/profile", label: "প্রোফাইল", icon: UserRound },
-    { href: "/dashboard/transactions", label: "লেনদেন", icon: HandCoins },
+    { href: "/dashboard/transactions", label: "লেনদেনের তথ্য", icon: HandCoins },
     { href: "/dashboard/notices", label: "নোটিশ বোর্ড", icon: Bell },
     ...(isAdmin ? [
       { href: "/dashboard/donations", label: "অনুদানের আবেদন", icon: HandCoins },

@@ -13,7 +13,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const [profileResult, summaryResult, recentTransactionsResult, noticeResult] = await Promise.all([
     supabase.from("profiles").select("full_name, role").eq("id", user.id).maybeSingle(),
     supabase.rpc("get_financial_summary", {}),
-    supabase.from("transactions").select("id, transaction_type, amount, donor_or_recipient, transaction_date").order("created_at", { ascending: false }).limit(8),
+    supabase.from("transactions").select("id, transaction_type, amount, donor_or_recipient, transaction_date, description").order("created_at", { ascending: false }).limit(8),
     supabase.from("notices").select("id, title, content, created_at, author_id").order("created_at", { ascending: false }).limit(5),
   ]);
   if (profileResult.error || summaryResult.error || recentTransactionsResult.error || noticeResult.error) {
@@ -66,10 +66,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       </section>}
 
       <section className="panel">
-        <div className="panel-header"><h2>সাম্প্রতিক লেনদেন</h2><Link className="text-link" href="/dashboard/transactions">সব লেনদেন <ArrowUpRight size={15} /></Link></div>
+        <div className="panel-header"><h2>সাম্প্রতিক লেনদেন</h2><Link className="text-link" href="/dashboard/transactions">লেনদেনের তথ্য দেখুন <ArrowUpRight size={15} /></Link></div>
         {recentTransactionsResult.error ? <EmptyState>লেনদেন লোড করা যায়নি। পরে আবার চেষ্টা করুন।</EmptyState> : transactions.length ? <div className="data-table-wrap"><table className="data-table">
-          <thead><tr><th>ধরন</th><th>নাম</th><th>তারিখ</th><th>টাকার পরিমাণ</th></tr></thead>
-          <tbody>{transactions.slice(0, 5).map((item) => <tr key={item.id}><td>{item.transaction_type === "INCOME" ? "জমা" : "খরচ"}</td><td>{item.donor_or_recipient}</td><td>{formatDate(item.transaction_date)}</td><td>{formatCurrency(Number(item.amount))}</td></tr>)}</tbody>
+          <thead><tr><th>ধরন</th><th>নাম</th><th>তারিখ</th><th>টাকার পরিমাণ</th><th>লেনদেনের তথ্য</th></tr></thead>
+          <tbody>{transactions.slice(0, 5).map((item) => <tr key={item.id}><td>{item.transaction_type === "INCOME" ? "জমা" : "খরচ"}</td><td>{item.donor_or_recipient}</td><td>{formatDate(item.transaction_date)}</td><td>{formatCurrency(Number(item.amount))}</td><td>{item.description || "—"}</td></tr>)}</tbody>
         </table></div> : <EmptyState>এখনও কোনো লেনদেনের তথ্য পাওয়া যায়নি।</EmptyState>}
       </section>
 

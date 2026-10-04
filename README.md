@@ -37,7 +37,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://আপনার-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=আপনার-publishable-key
 ```
 
-৩. Supabase Dashboard → SQL Editor-এ ক্রমানুসারে `supabase/migrations/20261004000000_initial_schema.sql` এবং `supabase/migrations/20261004230000_phone_login_and_donation_submissions.sql`—দুই ফাইলের সম্পূর্ণ SQL চালান।
+৩. Supabase Dashboard → SQL Editor-এ ক্রমানুসারে `supabase/migrations/20261004000000_initial_schema.sql`, `supabase/migrations/20261004230000_phone_login_and_donation_submissions.sql` এবং `supabase/migrations/20261005013000_required_transaction_comments.sql`—তিনটি ফাইলের সম্পূর্ণ SQL চালান। আগের দুটি migration আগে চালানো থাকলে শুধু তৃতীয়টি একবার চালান।
 ৪. Authentication → Providers/Sign In-এ **Email provider চালু** রাখুন এবং **Confirm email বন্ধ** করুন। অ্যাপটি ১১ অঙ্কের লগইন আইডিকে Supabase Email Auth-এর জন্য অভ্যন্তরীণ `.invalid` alias-এ রূপান্তর করে; ব্যবহারকারীর আসল ইমেইল বা ফোনে কোনো কোড পাঠানো হয় না। **Phone provider চালু বা SMS/Twilio credentials প্রয়োজন নেই।**
 ৫. Authentication → URL Configuration-এ স্থানীয় ও production URL যোগ করুন:
 
@@ -63,6 +63,10 @@ where mobile = '12345678901';
 ## বিকাশে অনুদান
 
 মূল পাতার **দান করুন** অংশে বিকাশ পার্সোনাল `01304-040565` নম্বরে সেন্ড মানি করার নির্দেশনা আছে। টাকা পাঠানোর পরে দাতা নাম, ট্রানজেকশন আইডি ও পরিমাণ পাঠাবেন। আবেদন আলাদা `donation_submissions` টেবিলে থাকে; মূল ব্যালেন্সে যোগ হয় না। ADMIN বিকাশে ট্রানজেকশন আইডি যাচাই করে **যাচাই করেছি — মূল হিসাবে যোগ করুন** চাপলে database function একই transaction-এ লেজার entry ও আবেদন status সংরক্ষণ করে এবং audit log তৈরি হয়। সন্দেহজনক আবেদন মুছে না দিয়ে বাতিল হিসেবে চিহ্নিত করা হয়।
+
+## লেনদেনের তথ্য ও মন্তব্য
+
+সদস্য, কমিটির সদস্য এবং ADMIN dashboard-এর **লেনদেনের তথ্য** পাতায় জমা ও খরচের লেনদেন এবং ADMIN-এর লেখা মন্তব্য দেখতে পারবেন। ADMIN প্রতিটি নতুন জমা বা খরচ যোগ করার সময় ৩–৫০০ অক্ষরের কারণ/মন্তব্য লিখবেন; অনুদানের আবেদন যাচাই করে মূল হিসাবে যোগ করার সময়ও মন্তব্য বাধ্যতামূলক। খরচ হিসেবে এন্ট্রি করলে ব্যালেন্স কমে—পুরোনো রেকর্ড মুছে ফেলার বদলে সংশোধনের কারণসহ নতুন খরচের রেকর্ড রাখুন। মন্তব্যসহ সব create/update আগের audit log-এও সংরক্ষিত হয়।
 
 ## আর্থিক প্রতিবেদন আমদানি
 

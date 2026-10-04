@@ -94,7 +94,7 @@ export type Database = {
         Returns: { income_total: number; expense_total: number; current_balance: number }[];
       };
       record_donation_submission: {
-        Args: { submission_id: string; income_category_id: string; donation_date: string | null };
+        Args: { submission_id: string; income_category_id: string; donation_date: string | null; transaction_comment: string };
         Returns: string;
       };
       reject_donation_submission: {

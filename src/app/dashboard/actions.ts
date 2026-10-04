@@ -71,7 +71,8 @@ export async function addTransaction(form: FormData) {
   const donor = String(form.get("donor_or_recipient") ?? "").trim();
   const categoryId = String(form.get("category_id") ?? "");
   const date = String(form.get("transaction_date") ?? "");
-  if (!["INCOME", "EXPENSE"].includes(type) || !Number.isFinite(amount) || amount <= 0 || !donor || !categoryId) {
+  const description = String(form.get("description") ?? "").trim();
+  if (!["INCOME", "EXPENSE"].includes(type) || !Number.isFinite(amount) || amount <= 0 || !donor || !categoryId || description.length < 3 || description.length > 500) {
     finish("/dashboard/transactions", "error");
   }
   const { data: category, error: categoryError } = await current.supabase
@@ -85,7 +86,7 @@ export async function addTransaction(form: FormData) {
     amount,
     donor_or_recipient: donor,
     category_id: categoryId,
-    description: String(form.get("description") ?? "").trim() || null,
+    description,
     transaction_date: date || null,
     created_by: current.id,
   });
@@ -103,12 +104,13 @@ export async function updateTransaction(form: FormData) {
   const amount = Number(form.get("amount"));
   const date = String(form.get("transaction_date") ?? "");
   const party = String(form.get("donor_or_recipient") ?? "").trim();
-  if (!id || !Number.isFinite(amount) || amount <= 0 || !party) finish("/dashboard/transactions", "error");
+  const description = String(form.get("description") ?? "").trim();
+  if (!id || !Number.isFinite(amount) || amount <= 0 || !party || description.length < 3 || description.length > 500) finish("/dashboard/transactions", "error");
   const { error } = await current.supabase.from("transactions").update({
     amount,
     transaction_date: date || null,
     donor_or_recipient: party,
-    description: String(form.get("description") ?? "").trim() || null,
+    description,
   }).eq("id", id);
   if (error) {
     console.error("Transaction update failed:", error);
@@ -344,11 +346,13 @@ export async function recordDonationSubmission(form: FormData) {
   const submissionId = String(form.get("submission_id") ?? "");
   const categoryId = String(form.get("category_id") ?? "");
   const date = String(form.get("donation_date") ?? "");
-  if (!submissionId || !categoryId) finish("/dashboard/donations", "error");
+  const comment = String(form.get("comment") ?? "").trim();
+  if (!submissionId || !categoryId || comment.length < 3 || comment.length > 500) finish("/dashboard/donations", "error");
   const { error } = await current.supabase.rpc("record_donation_submission", {
     submission_id: submissionId,
     income_category_id: categoryId,
     donation_date: date || null,
+    transaction_comment: comment,
   });
   if (error) {
     console.error("Donation submission could not be recorded:", error);

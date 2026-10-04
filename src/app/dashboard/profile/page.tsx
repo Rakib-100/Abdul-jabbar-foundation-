@@ -4,7 +4,7 @@ import { Feedback } from "@/components/feedback";
 import { updateProfile } from "@/app/dashboard/actions";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
-import { formatBangladeshPhone } from "@/lib/phone";
+import { formatMemberLoginId } from "@/lib/member-id";
 import type { Role } from "@/types/database";
 
 export const metadata: Metadata = { title: "প্রোফাইল" };
@@ -38,7 +38,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <form className="stacked-form" action={updateProfile}>
           <div className="field"><label htmlFor="full_name">নাম</label><input id="full_name" name="full_name" defaultValue={profile.full_name} required /></div>
           <div className="form-row">
-            <div className="field"><label htmlFor="mobile">লগইন মোবাইল নম্বর</label><input id="mobile" name="mobile" type="tel" value={formatBangladeshPhone(profile.mobile)} readOnly /><span className="field-hint">এই নম্বরটি আপনার লগইন আইডি; পরিবর্তনের জন্য প্রশাসকের সঙ্গে যোগাযোগ করুন।</span></div>
+            <div className="field"><label htmlFor="mobile">লগইন আইডি</label><input id="mobile" name="mobile" type="text" value={formatMemberLoginId(profile.mobile)} readOnly /><span className="field-hint">এই ১১ অঙ্ক আপনার লগইন আইডি; পরিবর্তনের জন্য প্রশাসকের সঙ্গে যোগাযোগ করুন।</span></div>
             <div className="field"><label htmlFor="member-type">সদস্যের ধরন</label><input id="member-type" value={roleLabels[profile.role]} readOnly /></div>
           </div>
           <div className="field"><label htmlFor="address">ঠিকানা</label><input id="address" name="address" defaultValue={profile.address ?? ""} /></div>

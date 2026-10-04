@@ -5,7 +5,7 @@ import { setMemberAccess } from "@/app/dashboard/actions";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
 import type { Role } from "@/types/database";
-import { formatBangladeshPhone } from "@/lib/phone";
+import { formatMemberLoginId } from "@/lib/member-id";
 
 export const metadata: Metadata = { title: "সদস্য পরিচালনা" };
 
@@ -38,10 +38,10 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
       <section className="panel">
         <h2>সদস্যবৃন্দ</h2>
         {error ? <EmptyState>সদস্যদের তথ্য লোড করা যায়নি। পরে আবার চেষ্টা করুন।</EmptyState> : members?.length ? <div className="data-table-wrap"><table className="data-table">
-          <thead><tr><th>নাম</th><th>মোবাইল নম্বর</th><th>ঠিকানা</th><th>ধরন</th><th>নিবন্ধনের তারিখ</th><th>অবস্থা</th><th>পরিচালনা</th></tr></thead>
+          <thead><tr><th>নাম</th><th>লগইন আইডি</th><th>ঠিকানা</th><th>ধরন</th><th>নিবন্ধনের তারিখ</th><th>অবস্থা</th><th>পরিচালনা</th></tr></thead>
           <tbody>{members.map((member) => <tr key={member.id}>
             <td>{member.full_name}</td>
-            <td>{formatBangladeshPhone(member.mobile)}</td><td>{member.address ?? "—"}</td>
+            <td>{formatMemberLoginId(member.mobile)}</td><td>{member.address ?? "—"}</td>
             <td>{roleLabels[member.role]}</td><td>{formatDate(member.created_at)}</td>
             <td><span className={`pill${member.is_active ? "" : " pill--inactive"}`}>{member.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}</span></td>
             <td>{member.role === "ADMIN" ? "—" : <div className="member-access-form">

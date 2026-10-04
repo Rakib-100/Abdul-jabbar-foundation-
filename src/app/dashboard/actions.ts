@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Role, TransactionType } from "@/types/database";
-import { toBangladeshAuthPhone } from "@/lib/phone";
+import { toMemberAuthEmail, toMemberLoginId } from "@/lib/member-id";
 
 const maxImageSize = 2 * 1024 * 1024;
 const validImageTypes = ["image/jpeg", "image/png"];
@@ -31,10 +31,11 @@ export async function updateProfile(form: FormData) {
   const mobile = String(form.get("mobile") ?? "").trim();
   const address = String(form.get("address") ?? "").trim();
   const file = form.get("photo");
-  const phone = toBangladeshAuthPhone(mobile);
+  const loginId = toMemberLoginId(mobile);
+  const authEmail = toMemberAuthEmail(mobile);
   const { data: { user } } = await current.supabase.auth.getUser();
-  if (!fullName || !phone) finish("/dashboard/profile", "error");
-  if (phone !== user?.phone) finish("/dashboard/profile", "phone-locked");
+  if (!fullName || !loginId || !authEmail) finish("/dashboard/profile", "error");
+  if (authEmail !== user?.email) finish("/dashboard/profile", "phone-locked");
   const update: { full_name: string; address: string | null; profile_photo_url?: string } = {
     full_name: fullName,
     address: address || null,

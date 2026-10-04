@@ -7,7 +7,7 @@ import { type FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { toBangladeshAuthPhone } from "@/lib/phone";
+import { toMemberAuthEmail } from "@/lib/member-id";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,10 +20,9 @@ export default function LoginPage() {
     setMessage("");
     setPending(true);
     const form = new FormData(event.currentTarget);
-    const phoneInput = String(form.get("mobile") ?? "").trim();
-    const phone = toBangladeshAuthPhone(phoneInput);
-    if (!phone) {
-      setMessage("সঠিক ১১ সংখ্যার বাংলাদেশি মোবাইল নম্বর লিখুন।");
+    const loginEmail = toMemberAuthEmail(String(form.get("mobile") ?? ""));
+    if (!loginEmail) {
+      setMessage("লগইন আইডি হিসেবে ঠিক ১১টি অঙ্ক লিখুন।");
       setPending(false);
       return;
     }
@@ -35,15 +34,15 @@ export default function LoginPage() {
     }
 
     if (helpMode) {
-      setMessage("নম্বর যাচাই ছাড়া স্বয়ংক্রিয়ভাবে পাসওয়ার্ড বদলালে অন্য কেউ আপনার অ্যাকাউন্ট নিতে পারে। পরিচয় যাচাইয়ের জন্য ফাউন্ডেশন প্রশাসকের সঙ্গে যোগাযোগ করুন।");
+      setMessage("লগইন আইডি যাচাই ছাড়া স্বয়ংক্রিয়ভাবে পাসওয়ার্ড বদলানো নিরাপদ নয়। পরিচয় যাচাইয়ের জন্য ফাউন্ডেশন প্রশাসকের সঙ্গে যোগাযোগ করুন।");
       setPending(false);
       return;
     }
 
     const password = String(form.get("password") ?? "");
-    const { data, error } = await supabase.auth.signInWithPassword({ phone, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
     if (error || !data.user) {
-      setMessage("মোবাইল নম্বর অথবা পাসওয়ার্ড সঠিক নয়। আবার চেষ্টা করুন।");
+      setMessage("লগইন আইডি অথবা পাসওয়ার্ড সঠিক নয়। আবার চেষ্টা করুন।");
       setPending(false);
       return;
     }
@@ -88,10 +87,10 @@ export default function LoginPage() {
           <div className="auth-card">
             <div className="auth-card__top">
               <h2>{helpMode ? "পাসওয়ার্ড সহায়তা" : "লগইন করুন"}</h2>
-              <p>{helpMode ? "অ্যাকাউন্টের নিরাপত্তার জন্য প্রশাসকের সাহায্য নিন।" : "আপনার মোবাইল নম্বর ও পাসওয়ার্ড দিয়ে প্রবেশ করুন।"}</p>
+              <p>{helpMode ? "অ্যাকাউন্টের নিরাপত্তার জন্য প্রশাসকের সাহায্য নিন।" : "আপনার ১১ অঙ্কের লগইন আইডি ও পাসওয়ার্ড দিয়ে প্রবেশ করুন।"}</p>
             </div>
             <form className="form-grid" onSubmit={handleSubmit}>
-              <div className="field"><label htmlFor="mobile">মোবাইল নম্বর</label><input id="mobile" name="mobile" type="tel" autoComplete="tel" required placeholder="০১XXXXXXXXX" /></div>
+              <div className="field"><label htmlFor="mobile">লগইন আইডি (১১ অঙ্ক)</label><input id="mobile" name="mobile" type="text" inputMode="numeric" autoComplete="username" maxLength={11} required placeholder="১১ অঙ্কের আইডি লিখুন" /></div>
               {!helpMode && <div className="field"><label htmlFor="password">পাসওয়ার্ড</label><input id="password" name="password" type="password" autoComplete="current-password" required placeholder="আপনার পাসওয়ার্ড লিখুন" /></div>}
               {message && <div className="form-alert" role="status">{message}</div>}
               {!helpMode && <button className="button auth-submit" type="submit" disabled={pending}>{pending ? "লোড হচ্ছে..." : "লগইন করুন"}</button>}
@@ -102,7 +101,7 @@ export default function LoginPage() {
               </button>
               {!helpMode && <span>নতুন সদস্য? <Link href="/register">নিবন্ধন করুন</Link></span>}
             </div>
-            {helpMode && <div className="form-alert">অ্যাকাউন্টে দেওয়া মোবাইল নম্বরটি যাচাই করা ছাড়া পাসওয়ার্ড পুনরুদ্ধার করা নিরাপদ নয়।</div>}
+            {helpMode && <div className="form-alert">অ্যাকাউন্টের লগইন আইডি যাচাই করা ছাড়া পাসওয়ার্ড পুনরুদ্ধার করা নিরাপদ নয়।</div>}
             <div className="auth-divider" />
             <Link className="text-link" href="/">মূল পাতায় ফিরে যান</Link>
           </div>

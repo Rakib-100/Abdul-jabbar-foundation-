@@ -38,25 +38,27 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=আপনার-publishable-key
 ```
 
 ৩. Supabase Dashboard → SQL Editor-এ ক্রমানুসারে `supabase/migrations/20261004000000_initial_schema.sql` এবং `supabase/migrations/20261004230000_phone_login_and_donation_submissions.sql`—দুই ফাইলের সম্পূর্ণ SQL চালান।
-৪. Authentication → Providers/Sign In-এ **Phone** চালু করুন। OTP ছাড়া নিবন্ধন-লগইনের জন্য **Confirm phone** বন্ধ রাখুন। এতে মোবাইল নম্বর যে ব্যবহারকারীর, তা SMS দিয়ে যাচাই হয় না; যে কেউ অন্যের নম্বর দিয়ে account খোলার ঝুঁকি থাকে। production-এ OTP চালু করার সিদ্ধান্ত নিলে SMS provider লাগবে এবং বর্তমান UI-তে OTP flow যোগ করতে হবে।
+৪. Authentication → Providers/Sign In-এ **Email provider চালু** রাখুন এবং **Confirm email বন্ধ** করুন। অ্যাপটি ১১ অঙ্কের লগইন আইডিকে Supabase Email Auth-এর জন্য অভ্যন্তরীণ `.invalid` alias-এ রূপান্তর করে; ব্যবহারকারীর আসল ইমেইল বা ফোনে কোনো কোড পাঠানো হয় না। **Phone provider চালু বা SMS/Twilio credentials প্রয়োজন নেই।**
 ৫. Authentication → URL Configuration-এ স্থানীয় ও production URL যোগ করুন:
 
 - Site URL: স্থানীয়ভাবে `http://localhost:3000`; প্রকাশের পরে Vercel URL
 - Redirect URL: `http://localhost:3000/auth/callback`
 - Redirect URL: `https://আপনার-vercel-domain/auth/callback`
-- মোবাইল verification বন্ধ থাকলে callback redirect প্রয়োজন নেই।
+- Email confirmation বন্ধ থাকলে callback redirect প্রয়োজন হয় না।
+
+লগইন আইডি **ঠিক ১১টি অঙ্ক**—বাংলা বা ইংরেজি অঙ্ক—হতে হবে; এটি বাস্তব মোবাইল নম্বর হওয়া জরুরি নয়। আইডি যাচাই করা হয় না এবং ID মালিকানা প্রমাণ করে না। তাই সদস্যদের জন্য আলাদা ID দিন, শক্তিশালী password ব্যবহার করুন এবং ADMIN অধিকার কেবল বিশ্বস্ত ব্যক্তিকে দিন। Password ভুলে গেলে স্বয়ংক্রিয় email reset হবে না; প্রশাসকের সহায়তা লাগবে।
 
 ## প্রথম ADMIN তৈরি
 
-সাধারণ নিবন্ধন ফর্মে ADMIN ভূমিকা নেই। Supabase Dashboard → Authentication → Users থেকে নির্দিষ্ট প্রশাসকের বাংলাদেশি মোবাইল নম্বর ও password দিয়ে user তৈরি করুন। `handle_new_user` trigger প্রাথমিক MEMBER profile বানাবে। এরপর SQL Editor-এ কেবল সেই নির্দিষ্ট মোবাইল নম্বর দিয়ে চালান:
+সাধারণ নিবন্ধন ফর্মে ADMIN ভূমিকা নেই। সাইটের নিবন্ধন ফর্মে প্রশাসকের জন্য একটি নির্দিষ্ট ১১ অঙ্কের login ID ও password দিয়ে account তৈরি করুন। `handle_new_user` trigger প্রাথমিক MEMBER profile বানাবে। এরপর SQL Editor-এ সেই ID দিয়ে চালান:
 
 ```sql
 update public.profiles
 set role = 'ADMIN', is_active = true
-where mobile = '+8801XXXXXXXXX';
+where mobile = '12345678901';
 ```
 
-`+8801XXXXXXXXX`-এর জায়গায় প্রকৃত E.164 নম্বর দিন এবং update-এর আগে/পরে row-টি যাচাই করুন। ADMIN ভূমিকা পরিবর্তনের public API নেই। Supabase Service Role Key browser-এ বা `NEXT_PUBLIC_` variable-এ কখনো রাখবেন না।
+`12345678901`-এর জায়গায় নিবন্ধনে ব্যবহৃত ১১ অঙ্কের ID দিন এবং update-এর আগে/পরে row-টি যাচাই করুন। ADMIN ভূমিকা পরিবর্তনের public API নেই। Supabase Service Role Key browser-এ বা `NEXT_PUBLIC_` variable-এ কখনো রাখবেন না।
 
 ## বিকাশে অনুদান
 
@@ -85,7 +87,7 @@ Database-এর RLS প্রতিটি অনুমোদিত/অননু�
 ২. Vercel → Project → Settings → Environment Variables-এ `NEXT_PUBLIC_SUPABASE_URL` ও `NEXT_PUBLIC_SUPABASE_ANON_KEY` Production/Preview-এ যোগ করুন। Service Role Key যোগ করার প্রয়োজন নেই।
 ৩. Deploy করুন। Vercel-এর পাওয়া `https://...vercel.app` URL Supabase Authentication-এর Site URL ও Redirect URL-এ যোগ করুন।
 ৪. Vercel-এ Environment Variables পরিবর্তন করলে নতুন deployment দিন।
-৫. নতুন সদস্য নিবন্ধন, ইমেইল নিশ্চিতকরণ, লগইন, আলাদা ভূমিকার permissions, ছবি upload এবং CSV export যাচাই করুন।
+৫. নতুন সদস্য নিবন্ধন, confirmation ছাড়াই লগইন, আলাদা ভূমিকার permissions, ছবি upload এবং CSV export যাচাই করুন।
 
 ## চালনা ও যাচাই
 

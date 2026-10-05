@@ -140,7 +140,7 @@ export default function RegisterPage() {
               </div>
               <div className="field"><label htmlFor="full_name">নাম</label><input id="full_name" name="full_name" autoComplete="name" required placeholder="আপনার পূর্ণ নাম লিখুন" /></div>
               <div className="form-row">
-                <div className="field"><label htmlFor="mobile">লগইন আইডি (১১ অঙ্ক)</label><input id="mobile" name="mobile" type="text" autoComplete="username" inputMode="numeric" maxLength={11} required placeholder="যেকোনো ১১টি অঙ্ক" /><span className="field-hint">আসল মোবাইল নম্বর হওয়া জরুরি নয়; এই ১১ অঙ্কই আপনার লগইন আইডি হবে।</span></div>
+                <div className="field"><label htmlFor="mobile">নিজের ফোন নাম্বার দিন</label><input id="mobile" name="mobile" type="text" autoComplete="tel" inputMode="numeric" maxLength={11} required placeholder="১১ ডিজিটের ফোন নাম্বার" /><span className="field-hint">এই নাম্বার দিয়েই পরে লগইন করবেন।</span></div>
                 <div className="field"><label htmlFor="address">ঠিকানা</label><input id="address" name="address" autoComplete="street-address" required placeholder="আপনার ঠিকানা" /></div>
               </div>
               <div className="form-row">

@@ -10,6 +10,7 @@ import {
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { DonationForm } from "@/components/donation-form";
+import { NoticeContent } from "@/components/notice-content";
 import { getPublicOverview } from "@/lib/public-data";
 import { formatCurrency } from "@/lib/format";
 
@@ -110,7 +111,7 @@ export default async function Home() {
                   {notice.is_pinned && <span className="notice-card__tag">গুরুত্বপূর্ণ</span>}
                   <span className="notice-card__date">{notice.date}</span>
                   <h3>{notice.title}</h3>
-                  <p>{notice.content}</p>
+                  <NoticeContent content={notice.content} />
                   {notice.image && <Image className="notice-image" src={notice.image} alt={`${notice.title}-এর ছবি`} width={800} height={450} sizes="(max-width: 760px) calc(100vw - 60px), 350px" />}
                   <span className="notice-card__author">প্রকাশক: {notice.author}</span>
                 </article>

@@ -97,7 +97,7 @@ img { max-width: 100%; }
 .donation-card__heading p { margin: 0; color: #849094; font-size: 12px; }
 .amount-input { position: relative; }
 .amount-input > span { position: absolute; top: 50%; left: 13px; color: #9a784e; font-size: 16px; transform: translateY(-50%); }
-.amount-input input { padding-left: 33px; }
+.field .amount-input input { padding-left: 40px; }
 .donation-submit { width: 100%; margin-top: 1px; }
 .donation-note { color: #929d9e; font-size: 11px; line-height: 1.7; text-align: center; }
 
@@ -142,6 +142,9 @@ img { max-width: 100%; }
 .notice-card__date { color: #9b805d; font-size: 11px; }
 .notice-card h3 { margin: 12px 0 7px; color: var(--navy); font-size: 17px; font-weight: 600; }
 .notice-card p { display: -webkit-box; overflow: hidden; margin: 0; color: #697981; font-size: 13px; line-height: 1.8; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.notice-card__more { margin-top: 8px; }
+.notice-card__more summary { width: fit-content; cursor: pointer; color: #997448; font-size: 12px; font-weight: 600; }
+.notice-card__more[open] p { display: block; overflow: visible; margin-top: 8px; white-space: pre-wrap; -webkit-line-clamp: unset; }
 .notice-card__author { display: block; margin-top: 16px; color: #9aa3a6; font-size: 11px; }
 .empty-state { padding: 28px; border: 1px dashed #d9d5cb; border-radius: 10px; color: #818d90; background: #ffffffa8; text-align: center; font-size: 14px; }
 .committee-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 13px; }

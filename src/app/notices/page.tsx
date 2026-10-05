@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Pin } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { NoticeContent } from "@/components/notice-content";
 import { getPublicNotices } from "@/lib/public-data";
 
 export const metadata: Metadata = { title: "নোটিশ বোর্ড" };
@@ -29,7 +30,7 @@ export default async function NoticesPage() {
                 {notice.is_pinned && <span className="notice-card__tag"><Pin size={11} /> গুরুত্বপূর্ণ</span>}
                 <span className="notice-card__date">{notice.date}</span>
                 <h2>{notice.title}</h2>
-                <p>{notice.content}</p>
+                <NoticeContent content={notice.content} />
                 {notice.image && <Image className="notice-image" src={notice.image} alt={`${notice.title}-এর ছবি`} width={800} height={450} sizes="(max-width: 760px) calc(100vw - 60px), 560px" />}
                 <span className="notice-card__author">প্রকাশক: {notice.author}</span>
               </article>
